@@ -20,20 +20,36 @@ class Article:
         return f"'{self.title}' by {self.author}" 
 
 class Author:
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, name:str):
+        if not isinstance(name, str):
+            raise ValueError("Name must be a string.")
+        self._name = name
+
+    def __str__(self):
+        # Returns the author's name when the object is printed or converted to a string.
+        return self._name   # Return a readable string for the author
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        raise AttributeError("Name is immutable and cannot be changed.")
 
     def articles(self):
-        pass
+        return [article for article in Article.all if article.author == self]
 
     def magazines(self):
-        pass
+        return list(set(article.magazine for article in self.articles()))
 
     def add_article(self, magazine, title):
-        pass
+        return Article(self, magazine, title)
 
     def topic_areas(self):
-        pass
+
+        magazines = self.magazines()
+        return None if not magazines else list(set(magazine.category for magazine in magazines))
 
 class Magazine:
     def __init__(self, name, category):
