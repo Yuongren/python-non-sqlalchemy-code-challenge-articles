@@ -52,18 +52,67 @@ class Author:
         return None if not magazines else list(set(magazine.category for magazine in magazines))
 
 class Magazine:
+
+    all_magazines = []  # Store all magazines globally
+
     def __init__(self, name, category):
-        self.name = name
-        self.category = category
+        if not isinstance(name, str):
+            raise ValueError("Name must be a string.")
+        if not isinstance(category, str):
+            raise ValueError("Category must be a string.")
+
+        self._name = name
+        self._category = category
+        Magazine.all_magazines.append(self)
+
+    def __str__(self):
+         # Returns a formatted string showing the magazine's name and category.
+        return f"{self.name} ({self.category})"  
+    
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        if not isinstance(value, str) or not (2 <= len(value) <= 16):
+            raise ValueError("Name must be a string between 2 and 16 characters.")
+        self._name = value
+
+    @property
+    def category(self):
+        return self._category
+
+    @category.setter
+    def category(self, value):
+        if not isinstance(value, str) or len(value.strip()) == 0:
+            raise ValueError("Category must be a non-empty string.")
+        self._category = value
 
     def articles(self):
-        pass
+        return [article for article in Article.all if article.magazine == self]
 
     def contributors(self):
-        pass
+        return list(set(article.author for article in self.articles()))
 
     def article_titles(self):
-        pass
+        titles = [article.title for article in self.articles()]
+        return None if not titles else titles
 
     def contributing_authors(self):
-        pass
+        author_counts = {author: 0 for author in self.contributors()}
+        for article in self.articles():
+            author_counts[article.author] += 1
+        result = [author for author, count in author_counts.items() if count > 2]
+        return None if not result else result
+
+    @classmethod
+    def top_publisher(cls):
+        if not Article.all:
+            return None
+        magazine_counts = {magazine: 0 for magazine in cls.all_magazines}
+        for article in Article.all:
+            magazine_counts[article.magazine] += 1
+        return max(magazine_counts, key=magazine_counts.get)
+    
